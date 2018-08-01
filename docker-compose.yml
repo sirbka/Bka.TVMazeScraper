@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  bka.tvmazesraper.api:
+    image: ${DOCKER_REGISTRY}bkatvmazesraperapi
+    build:
+      context: .
+      dockerfile: Bka.TVMazeSraper.Api\Dockerfile
