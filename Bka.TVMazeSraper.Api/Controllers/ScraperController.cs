@@ -11,12 +11,12 @@ namespace Bka.TVMazeSraper.Api.Controllers
     {
         private readonly ITVShowService _tvShowService;
         private readonly ITVMazeService _tvMazeService;
-        private readonly ILogger<TVShowsController> _logger;
+        private readonly ILogger<ScraperController> _logger;
 
         public ScraperController(
             ITVShowService tvShowService,
             ITVMazeService tvMazeService,
-            ILogger<TVShowsController> logger)
+            ILogger<ScraperController> logger)
         {
             _tvShowService = tvShowService;
             _tvMazeService = tvMazeService;
