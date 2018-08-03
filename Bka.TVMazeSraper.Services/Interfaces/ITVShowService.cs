@@ -18,6 +18,11 @@ namespace Bka.TVMazeSraper.Services.Interfaces
         Task<List<TVShow>> GetTVShowsWithCast(int page, int pagesize, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Last TVShow ID in Database
+        /// </summary>
+        Task<uint> GetLastStoredTVShowID();
+
+        /// <summary>
         /// Store list of TV Shows to DataBase, update shows if required
         /// </summary>
         /// <param name="tvShows"></param>

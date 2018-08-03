@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bka.TVMazeSraper.Repositori
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bka.TVMazeSraper.Services", "Bka.TVMazeSraper.Services\Bka.TVMazeSraper.Services.csproj", "{3DCFEDF8-5658-41AF-8AC0-2E49609A2B41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bka.TVMazeSraper.ShowScraper", "Bka.TVMazeSraper.ShowScraper\Bka.TVMazeSraper.ShowScraper.csproj", "{C8B04D3B-CF6C-42AB-BA5D-51C8587999AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bka.TVMazeSraper.ShowScraper", "Bka.TVMazeSraper.ShowScraper\Bka.TVMazeSraper.ShowScraper.csproj", "{C8B04D3B-CF6C-42AB-BA5D-51C8587999AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

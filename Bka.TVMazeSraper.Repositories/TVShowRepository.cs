@@ -29,6 +29,12 @@ namespace Bka.TVMazeSraper.Repositories
             return await _showContext.TVShows.CountAsync();
         }
 
+        public async Task<uint> GetLastStoredTVShowID()
+        {
+            var lastShow = await _showContext.TVShows.LastAsync();
+            return lastShow?.ID ?? 0;
+        }
+
         public async Task<List<TVShow>> GetShowsWithCast(int page, int pagesize, CancellationToken cancellationToken)
         {
             return await _showContext.TVShows
@@ -54,12 +60,20 @@ namespace Bka.TVMazeSraper.Repositories
 
                         if (storedShow == null)
                         {
-                            _showContext.TVShows.Add(show);
+                            _logger.LogInformation( $"Add new TV Show {show.ID} {show.Name} to DB.");
+                            await  _showContext.TVShows.AddAsync(
+                                new TVShow()
+                                {
+                                    ID = show.ID,
+                                    Name = show.Name,
+                                    LastUpdateTime = show.LastUpdateTime
+                                });
                             await _showContext.SaveChangesAsync().ConfigureAwait(false);
                             await StoreCast(show.Cast);
                         }
                         else if (storedShow.LastUpdateTime < show.LastUpdateTime)
                         {
+                            _logger.LogInformation($"Update TV Show {show.ID} {show.Name} to DB.");
                             storedShow.LastUpdateTime = show.LastUpdateTime;
                             await StoreCast(show.Cast);
                         }
@@ -81,13 +95,20 @@ namespace Bka.TVMazeSraper.Repositories
         {
             foreach (var actor in actors)
             {
-                var storedActor = await _showContext.Actors.FirstOrDefaultAsync(act => act.ID == actor.ID);
+                var storedActor = await _showContext.Actors.FirstOrDefaultAsync(act => act.ID == actor.ID);                
 
                 if (storedActor == null)
                 {
                     try
                     {
-                        _showContext.Actors.Add(actor);
+                        _logger.LogInformation($"Add Actor {actor.ID} {actor.Name} to DB.");
+                        await _showContext.Actors.AddAsync(new Actor()
+                        {
+                            ID = actor.ID,
+                            TVShowID = actor.TVShowID,
+                            Name = actor.Name,
+                            Birthday = actor.Birthday
+                        });
                         await _showContext.SaveChangesAsync().ConfigureAwait(false);
                     }
                     catch (Exception ex)

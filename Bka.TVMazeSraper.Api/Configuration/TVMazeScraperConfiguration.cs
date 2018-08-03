@@ -1,4 +1,6 @@
-﻿using Bka.TVMazeSraper.Models.Interfaces;
+﻿using System;
+
+using Bka.TVMazeSraper.Models.Interfaces;
 
 namespace Bka.TVMazeSraper.Api.Configuration
 {
@@ -7,5 +9,7 @@ namespace Bka.TVMazeSraper.Api.Configuration
         public string TvMazeHttpClientName { get; internal set; }
 
         public string TvMazeShowEmbedCastLinkPostfix { get; internal set; }
+
+        public TimeSpan ScraperHostedServiceRepetition { get; internal set; }
     }
 }

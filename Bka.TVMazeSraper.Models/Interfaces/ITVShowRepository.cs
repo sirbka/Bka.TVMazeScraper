@@ -22,6 +22,12 @@ namespace Bka.TVMazeSraper.Models.Interfaces
         Task<int> GetShowsCount();
 
         /// <summary>
+        /// Get last stored TVShow ID
+        /// </summary>
+        /// <returns></returns>
+        Task<uint> GetLastStoredTVShowID();
+
+        /// <summary>
         /// Save TV Shows to DB
         /// </summary>
         /// <param name="tvShows"></param>

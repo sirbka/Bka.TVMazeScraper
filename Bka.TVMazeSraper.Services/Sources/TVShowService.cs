@@ -34,6 +34,19 @@ namespace Bka.TVMazeSraper.Services
             }
         }
 
+        public async Task<uint> GetLastStoredTVShowID()
+        {
+            try
+            {
+                return await _tvShowRepository.GetLastStoredTVShowID();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failure to get last TV Shows ID");
+                return 0;
+            }
+        }
+
         public async Task<int> StoreTVShows(List<TVShow> tvShows)
         {
             try

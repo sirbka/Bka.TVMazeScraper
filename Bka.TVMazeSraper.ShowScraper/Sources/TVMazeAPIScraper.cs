@@ -95,7 +95,7 @@ namespace Bka.TVMazeSraper.ShowScraper
                     foreach (var actor in scrapedShows.Embedded?.Cast)
                     {
                         if (!tvShow.Cast.Any(actr => actr.ID == actor.Person.ID))
-                            tvShow.Cast.Add(new Actor() { ID = actor.Person.ID, Name = actor.Person.Name, Birthday = actor.Person.Birthday });
+                            tvShow.Cast.Add(new Actor() { ID = actor.Person.ID, TVShowID = tvShow.ID, Name = actor.Person.Name, Birthday = actor.Person.Birthday });
                     }
                 }
                 return tvShow;

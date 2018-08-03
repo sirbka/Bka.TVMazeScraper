@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Microsoft.Extensions.Hosting;
 
 using AutoMapper;
 using Polly;
@@ -33,7 +34,6 @@ namespace Bka.TVMazeSraper.Api
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -50,18 +50,20 @@ namespace Bka.TVMazeSraper.Api
             services.AddTransient<ITVMazeRepository, TVMazeRepository>();
             services.AddTransient<ITVShowService, TVShowService>();
             services.AddTransient<ITVMazeService, TVMazeService>();
-            services.AddScoped<ITVMazeAPIScraper, TVMazeAPIScraper>();
+            services.AddTransient<ITVMazeAPIScraper, TVMazeAPIScraper>();
+
+            services.AddDbContext<TVShowContext>(options => options.UseSqlServer(
+                Configuration.GetConnectionString("TVShowDatabase"),
+                x => x.MigrationsAssembly("Bka.TVMazeSraper.Repositories")), ServiceLifetime.Singleton);
+            
 
             services.AddSingleton<ITVMazeScraperConfiguration, TVMazeScraperConfiguration>(config => 
                 new TVMazeScraperConfiguration()
                 {
                     TvMazeHttpClientName = Configuration.GetSection("HttpFactoryClients")["TVMazeHttpClient429Retry"],
-                    TvMazeShowEmbedCastLinkPostfix = Configuration.GetSection("TVMazeLinks")["ShowEmbedCastPostfix"]
+                    TvMazeShowEmbedCastLinkPostfix = Configuration.GetSection("TVMazeLinks")["ShowEmbedCastPostfix"],
+                    ScraperHostedServiceRepetition = TimeSpan.FromSeconds(int.Parse(Configuration.GetSection("ScraperHostedService")["RepetitionSeconds"]))
                 });
-
-            services.AddDbContext<TVShowContext>(options => options.UseSqlServer(
-                Configuration.GetConnectionString("TVShowDatabase"),
-                x => x.MigrationsAssembly("Bka.TVMazeSraper.Repositories")));
 
             // mapper configuration
             var mappingConfig = new MapperConfiguration(config =>
@@ -87,10 +89,12 @@ namespace Bka.TVMazeSraper.Api
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             })
             .AddPolicyHandler(tvMaze429retryPolicy);
+
+            // add background service to scrape and update TVShow data
+            services.AddHostedService<TVMazeScraperHostedService>();            
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
