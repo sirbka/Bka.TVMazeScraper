@@ -2,14 +2,12 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Linq;
 
 using Newtonsoft.Json;
 
-using Bka.TVMazeSraper.Models;
-using Bka.TVMazeSraper.Models.Interfaces;
-using Bka.TVMazeSraper.ShowScraper.Interfaces;
 using Bka.TVMazeSraper.ShowScraper.Models;
+using Bka.TVMazeSraper.Models;
+using Bka.TVMazeSraper.ShowScraper.Interfaces;
 
 namespace Bka.TVMazeSraper.ShowScraper
 {
@@ -18,29 +16,39 @@ namespace Bka.TVMazeSraper.ShowScraper
     /// </summary>
     public class TVMazeAPIScraper : ITVMazeAPIScraper
     {
-        private readonly IHttpClientFactory _httpTVMazeClientFactory;
-        private readonly ITVMazeScraperConfiguration _configuration;
+        /// <summary>
+        /// Show's main information and its cast list in one single response. 
+        /// </summary>
+        private readonly string _tvMazeShowEmbedCastLink;
+        //private readonly IHttpClientFactory _httpClientFactory;
+        HttpClient _httpClient;
 
-        public TVMazeAPIScraper(IHttpClientFactory httpClientFactory, ITVMazeScraperConfiguration configuration)
+        public TVMazeAPIScraper(string tvMazeShowEmbedCastLink)//, IHttpClientFactory httpClientFactory)
+        {            
+            _tvMazeShowEmbedCastLink = tvMazeShowEmbedCastLink;
+            //_httpClientFactory = httpClientFactory;
+        }
+
+        public TVMazeAPIScraper(HttpClient _client)//, IHttpClientFactory httpClientFactory)
         {
-            _httpTVMazeClientFactory = httpClientFactory;
-            _configuration = configuration;
+            _httpClient = _client;
+            //_httpClientFactory = httpClientFactory;
         }
 
         /// <summary>
         /// Base TvMaze fetching method
         /// </summary>
         /// <typeparam name="T">Type of Class for the incoming Json to be DeSerialized to.</typeparam>
-        /// <param name="link">Relative tvmaze link to data collection</param>
+        /// <param name="link">Link to data collection</param>
         /// <returns></returns>
-        private async Task<T> Scrape<T>(string relativeLink)
+        private async Task<T> Scrape<T>(Uri link)
         {
             string results = "";
             string responseData = "";
 
-            using (HttpClient client = _httpTVMazeClientFactory.CreateClient(_configuration.TvMazeHttpClientName))
+            using (HttpClient client = new HttpClient())
             {
-                HttpResponseMessage response = await client.GetAsync(relativeLink);
+                HttpResponseMessage response = await client.GetAsync(link);
                 responseData = await response.Content.ReadAsStringAsync();
 
                 if (response.ReasonPhrase == "OK")
@@ -78,24 +86,34 @@ namespace Bka.TVMazeSraper.ShowScraper
         }
 
         /// <summary>
+        /// Get TVMaze Show information and cast by TVMaze ID in one request
+        /// </summary>
+        /// <param name="TVMazeID">TVMaze Show ID</param>
+        /// <returns></returns>
+        internal async Task<MazeShowEmbedded> GetShowEmbeddedCast(uint TVMazeID)
+        {
+            return await Scrape<MazeShowEmbedded>(new Uri(string.Format(_tvMazeShowEmbedCastLink, TVMazeID)));
+        }
+
+        /// <summary>
         /// Get converted TVMaze Show
         /// </summary>
         /// <param name="TVMazeID">TVMaze Show ID</param>
         /// <returns></returns>
         public async Task<TVShow> GeTVShow(uint TVMazeID)
         {
-            var scrapedShows = await Scrape<MazeShowEmbedded>(string.Format(_configuration.TvMazeShowEmbedCastLinkPostfix, TVMazeID));
+            var scrapedShows = await Scrape<MazeShowEmbedded>(new Uri(string.Format(_tvMazeShowEmbedCastLink, TVMazeID)));
 
             if (scrapedShows != null)
             {
+                // TODO: make better converter
                 var tvShow = new TVShow() { ID = scrapedShows.ID, Name = scrapedShows.Name, LastUpdateTime = scrapedShows.LastUpdateTime };
                 if (scrapedShows.Embedded?.Cast != null)
                 {
                     tvShow.Cast = new List<Actor>();
                     foreach (var actor in scrapedShows.Embedded?.Cast)
                     {
-                        if (!tvShow.Cast.Any(actr => actr.ID == actor.Person.ID))
-                            tvShow.Cast.Add(new Actor() { ID = actor.Person.ID, Name = actor.Person.Name, Birthday = actor.Person.Birthday });
+                        tvShow.Cast.Add(new Actor() { ID = actor.Person.ID, Name = actor.Person.Name, Birthday = actor.Person.Birthday });
                     }
                 }
                 return tvShow;

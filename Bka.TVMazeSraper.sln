@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2042
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bka.TVMazeSraper.Api", "Bka.TVMazeSraper.Api\Bka.TVMazeSraper.Api.csproj", "{BFF49CEE-FBA7-47F6-8FDE-08642969DEEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bka.TVMazeSraper.Api", "Bka.TVMazeSraper.Api\Bka.TVMazeSraper.Api.csproj", "{BFF49CEE-FBA7-47F6-8FDE-08642969DEEF}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{7F7046ED-3229-4B7B-9D2A-EE34EF13ACC1}"
 EndProject
@@ -11,9 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bka.TVMazeSraper.Models", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bka.TVMazeSraper.Repositories", "Bka.TVMazeSraper.Repositories\Bka.TVMazeSraper.Repositories.csproj", "{AFF2B391-7180-4010-B017-E13C5A6F0F3A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bka.TVMazeSraper.ShowScraper", "Bka.TVMazeSraper.ShowScraper\Bka.TVMazeSraper.ShowScraper.csproj", "{6CAA82CA-0087-482C-964B-D648D8BB0116}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bka.TVMazeSraper.Services", "Bka.TVMazeSraper.Services\Bka.TVMazeSraper.Services.csproj", "{3DCFEDF8-5658-41AF-8AC0-2E49609A2B41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bka.TVMazeSraper.Services", "Bka.TVMazeSraper.Services\Bka.TVMazeSraper.Services.csproj", "{3DCFEDF8-5658-41AF-8AC0-2E49609A2B41}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bka.TVMazeSraper.ShowScraper", "Bka.TVMazeSraper.ShowScraper\Bka.TVMazeSraper.ShowScraper.csproj", "{C8B04D3B-CF6C-42AB-BA5D-51C8587999AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,14 +37,14 @@ Global
 		{AFF2B391-7180-4010-B017-E13C5A6F0F3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFF2B391-7180-4010-B017-E13C5A6F0F3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFF2B391-7180-4010-B017-E13C5A6F0F3A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6CAA82CA-0087-482C-964B-D648D8BB0116}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6CAA82CA-0087-482C-964B-D648D8BB0116}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6CAA82CA-0087-482C-964B-D648D8BB0116}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6CAA82CA-0087-482C-964B-D648D8BB0116}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3DCFEDF8-5658-41AF-8AC0-2E49609A2B41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3DCFEDF8-5658-41AF-8AC0-2E49609A2B41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DCFEDF8-5658-41AF-8AC0-2E49609A2B41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DCFEDF8-5658-41AF-8AC0-2E49609A2B41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8B04D3B-CF6C-42AB-BA5D-51C8587999AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8B04D3B-CF6C-42AB-BA5D-51C8587999AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8B04D3B-CF6C-42AB-BA5D-51C8587999AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8B04D3B-CF6C-42AB-BA5D-51C8587999AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
