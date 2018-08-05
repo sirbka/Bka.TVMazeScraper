@@ -38,11 +38,13 @@ namespace Bka.TVMazeSraper.Repositories
         public async Task<List<TVShow>> GetShowsWithCast(int page, int pagesize, CancellationToken cancellationToken)
         {
             return await _showContext.TVShows
-                .Include(show => show.Cast)
+                .Include(show => show.ActorsTVShows)
+                .ThenInclude(ats => ats.Actor)
                 .OrderBy(show => show.ID)
                 .Skip(page * pagesize)
                 .Take(pagesize)
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
         }
 
         public async Task<int> StoreTVShows(List<TVShow> tvShows)
@@ -61,22 +63,24 @@ namespace Bka.TVMazeSraper.Repositories
                         if (storedShow == null)
                         {
                             _logger.LogInformation( $"Add new TV Show {show.ID} {show.Name} to DB.");
-                            await  _showContext.TVShows.AddAsync(
-                                new TVShow()
-                                {
-                                    ID = show.ID,
-                                    Name = show.Name,
-                                    LastUpdateTime = show.LastUpdateTime
-                                });
+                            var newTVShow = new TVShow()
+                            {
+                                ID = show.ID,
+                                Name = show.Name,
+                                LastUpdateTime = show.LastUpdateTime
+                            };
+                            await  _showContext.TVShows.AddAsync(newTVShow);
                             await _showContext.SaveChangesAsync().ConfigureAwait(false);
-                            await StoreCast(show.Cast);
+
+                            await StoreCast(show.ActorsTVShows, newTVShow);
                         }
-                        else if (storedShow.LastUpdateTime < show.LastUpdateTime)
-                        {
-                            _logger.LogInformation($"Update TV Show {show.ID} {show.Name} to DB.");
-                            storedShow.LastUpdateTime = show.LastUpdateTime;
-                            await StoreCast(show.Cast);
-                        }
+                        //else if (storedShow.LastUpdateTime < show.LastUpdateTime)
+                        //{
+                        //    _logger.LogInformation($"Update TV Show {show.ID} {show.Name} to DB.");
+                        //    storedShow.LastUpdateTime = show.LastUpdateTime;
+
+                        //    await StoreCast(show.ActorsTVShows);
+                        //}
                         await _showContext.SaveChangesAsync().ConfigureAwait(false);
                         transaction.Commit();                        
                     }
@@ -91,31 +95,54 @@ namespace Bka.TVMazeSraper.Repositories
             return processedTVShows;
         }
 
-        private async Task StoreCast(List<Actor> actors)
+        private async Task StoreCast(List<ActorTVShow> actorsAndShows, TVShow storedShow)
         {
-            foreach (var actor in actors)
+            foreach (var actorShow in actorsAndShows)
             {
-                var storedActor = await _showContext.Actors.FirstOrDefaultAsync(act => act.ID == actor.ID);                
-
+                var storedActor = await _showContext.Actors.FirstOrDefaultAsync(act => act.ID == actorShow.ActorID);
                 if (storedActor == null)
                 {
                     try
                     {
-                        _logger.LogInformation($"Add Actor {actor.ID} {actor.Name} to DB.");
-                        await _showContext.Actors.AddAsync(new Actor()
+                        _logger.LogInformation($"Add Actor {actorShow.ActorID} {actorShow?.Actor?.Name} to DB.");
+                        var newActor = new Actor()
                         {
-                            ID = actor.ID,
-                            TVShowID = actor.TVShowID,
-                            Name = actor.Name,
-                            Birthday = actor.Birthday
-                        });
+                            ID = actorShow.ActorID,
+                            Name = actorShow.Actor.Name,
+                            Birthday = actorShow.Actor?.Birthday
+                        };
+                        await _showContext.Actors.AddAsync(newActor);
+                        await _showContext.SaveChangesAsync().ConfigureAwait(false);
+                        _showContext.ActorsTVShows.Add(
+                            new ActorTVShow()
+                            {
+                                Actor = newActor,
+                                ActorID = newActor.ID,
+                                TVShow = storedShow,
+                                TVShowID = storedShow.ID
+                            });
                         await _showContext.SaveChangesAsync().ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"Something bad happend inside transaction during Actor {actor.ID} update.");
+                        _logger.LogError(ex, $"Something bad happend inside transaction during Actor {actorShow.ActorID} update.");
                     }
-                }                
+                }  
+                else
+                {
+                    if (!_showContext.ActorsTVShows.Any(actShow => actShow.TVShowID == storedShow.ID && actShow.ActorID == storedActor.ID))
+                    {
+                        _showContext.ActorsTVShows.Add(
+                                new ActorTVShow()
+                                {
+                                    Actor = storedActor,
+                                    ActorID = storedActor.ID,
+                                    TVShow = storedShow,
+                                    TVShowID = storedShow.ID
+                                });
+                        await _showContext.SaveChangesAsync().ConfigureAwait(false);
+                    }
+                }
             }
         }
     }

@@ -89,13 +89,25 @@ namespace Bka.TVMazeSraper.ShowScraper
             if (scrapedShows != null)
             {
                 var tvShow = new TVShow() { ID = scrapedShows.ID, Name = scrapedShows.Name, LastUpdateTime = scrapedShows.LastUpdateTime };
+
                 if (scrapedShows.Embedded?.Cast != null)
                 {
-                    tvShow.Cast = new List<Actor>();
+                    var actrShow = tvShow.ActorsTVShows = new List<ActorTVShow>();
                     foreach (var actor in scrapedShows.Embedded?.Cast)
                     {
-                        if (!tvShow.Cast.Any(actr => actr.ID == actor.Person.ID))
-                            tvShow.Cast.Add(new Actor() { ID = actor.Person.ID, TVShowID = tvShow.ID, Name = actor.Person.Name, Birthday = actor.Person.Birthday });
+                        var newActor = new Actor()
+                        {
+                            ID = actor.Person.ID,
+                            Name = actor.Person.Name,
+                            Birthday = actor.Person?.Birthday };
+
+                        actrShow.Add(new ActorTVShow()
+                        {
+                            Actor = newActor,
+                            ActorID = newActor.ID,
+                            TVShow = tvShow,
+                            TVShowID = tvShow.ID
+                        });                        
                     }
                 }
                 return tvShow;

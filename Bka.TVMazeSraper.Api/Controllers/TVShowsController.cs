@@ -31,7 +31,7 @@ namespace Bka.TVMazeSraper.Api.Controllers
 
         [HttpGet]
         [Route("api/shows")]
-        public async Task<List<OutputTVShow>> List(int page = 0, int pagesize = 20, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<List<OutputTVShow>> Shows(int page = 0, int pagesize = 20, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (page < 0)
             {
@@ -47,9 +47,9 @@ namespace Bka.TVMazeSraper.Api.Controllers
 
             _logger.Log(LogLevel.Information, $"Found {tvShows.Count} TV Shows for {page} ({pagesize})");
 
-            tvShows.ForEach(s => s.Cast = s.Cast.OrderByDescending(ca => ca.Birthday).ToList());
-
             var result = _mapper.Map<List<TVShow>, List<OutputTVShow>>(tvShows).ToList();
+
+            result.ForEach(s => s.Cast = s.Cast.OrderByDescending(cast => cast.Birthday).ToList());
 
             return result;
         }

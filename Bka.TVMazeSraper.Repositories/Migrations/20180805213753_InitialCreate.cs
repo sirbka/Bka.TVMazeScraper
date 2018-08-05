@@ -8,6 +8,19 @@ namespace Bka.TVMazeSraper.Repositories.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Actors",
+                columns: table => new
+                {
+                    ID = table.Column<long>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    Birthday = table.Column<DateTime>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Actors", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TVShows",
                 columns: table => new
                 {
@@ -21,33 +34,40 @@ namespace Bka.TVMazeSraper.Repositories.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Actors",
+                name: "ActorsTVShows",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    Birthday = table.Column<DateTime>(nullable: true),
-                    TVShowID = table.Column<long>(nullable: true)
+                    ActorID = table.Column<long>(nullable: false),
+                    TVShowID = table.Column<long>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Actors", x => x.Id);
+                    table.PrimaryKey("PK_ActorsTVShows", x => new { x.ActorID, x.TVShowID });
                     table.ForeignKey(
-                        name: "FK_Actors_TVShows_TVShowID",
+                        name: "FK_ActorsTVShows_Actors_ActorID",
+                        column: x => x.ActorID,
+                        principalTable: "Actors",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ActorsTVShows_TVShows_TVShowID",
                         column: x => x.TVShowID,
                         principalTable: "TVShows",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Actors_TVShowID",
-                table: "Actors",
+                name: "IX_ActorsTVShows_TVShowID",
+                table: "ActorsTVShows",
                 column: "TVShowID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ActorsTVShows");
+
             migrationBuilder.DropTable(
                 name: "Actors");
 

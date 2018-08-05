@@ -22,6 +22,7 @@ using Bka.TVMazeSraper.ShowScraper;
 using Bka.TVMazeSraper.ShowScraper.Interfaces;
 using Bka.TVMazeSraper.Services.Interfaces;
 using Bka.TVMazeSraper.Services;
+using System.Linq;
 
 namespace Bka.TVMazeSraper.Api
 {
@@ -54,7 +55,7 @@ namespace Bka.TVMazeSraper.Api
 
             services.AddDbContext<TVShowContext>(options => options.UseSqlServer(
                 Configuration.GetConnectionString("TVShowDatabase"),
-                x => x.MigrationsAssembly("Bka.TVMazeSraper.Repositories")), ServiceLifetime.Singleton);
+                config => config.MigrationsAssembly("Bka.TVMazeSraper.Repositories")), ServiceLifetime.Singleton);
             
 
             services.AddSingleton<ITVMazeScraperConfiguration, TVMazeScraperConfiguration>(config => 
@@ -68,7 +69,9 @@ namespace Bka.TVMazeSraper.Api
             // mapper configuration
             var mappingConfig = new MapperConfiguration(config =>
             {
-                config.CreateMap<TVShow, OutputTVShow>();
+                config.CreateMap<TVShow, OutputTVShow>()
+                .ForMember(destinationMember => destinationMember.Cast, 
+                    memberOptions => memberOptions.MapFrom(show => show.ActorsTVShows.Select(actorshow => actorshow.Actor)));
                 config.CreateMap<Actor, OutputActor>();
             });
             services.AddSingleton<IMapper, IMapper>(sp => mappingConfig.CreateMapper());

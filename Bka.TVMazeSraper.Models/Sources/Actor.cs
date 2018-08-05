@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Bka.TVMazeSraper.Models
@@ -13,10 +14,6 @@ namespace Bka.TVMazeSraper.Models
         /// </summary>
         public uint ID { get; set; }
         /// <summary>
-        /// Foreign key
-        /// </summary>
-        public uint TVShowID { get; set; }
-        /// <summary>
         /// Name of the Actor.
         /// </summary>
         public string Name { get; set; }
@@ -24,6 +21,8 @@ namespace Bka.TVMazeSraper.Models
         /// Birthday date
         /// </summary>
         public DateTime? Birthday { get; set; }
+
+        public List<ActorTVShow> ActorsTVShows { get; set; }
 
         public override string ToString()
         {

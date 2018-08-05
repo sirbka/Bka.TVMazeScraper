@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bka.TVMazeSraper.Repositories.Migrations
 {
     [DbContext(typeof(TVShowContext))]
-    [Migration("20180801095206_InitialCreate")]
+    [Migration("20180805213753_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,20 +23,29 @@ namespace Bka.TVMazeSraper.Repositories.Migrations
 
             modelBuilder.Entity("Bka.TVMazeSraper.Models.Actor", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<long>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<DateTime?>("Birthday");
 
                     b.Property<string>("Name");
 
-                    b.Property<long?>("TVShowID");
+                    b.HasKey("ID");
 
-                    b.HasKey("Id");
+                    b.ToTable("Actors");
+                });
+
+            modelBuilder.Entity("Bka.TVMazeSraper.Models.ActorTVShow", b =>
+                {
+                    b.Property<long>("ActorID");
+
+                    b.Property<long>("TVShowID");
+
+                    b.HasKey("ActorID", "TVShowID");
 
                     b.HasIndex("TVShowID");
 
-                    b.ToTable("Actors");
+                    b.ToTable("ActorsTVShows");
                 });
 
             modelBuilder.Entity("Bka.TVMazeSraper.Models.TVShow", b =>
@@ -53,11 +62,17 @@ namespace Bka.TVMazeSraper.Repositories.Migrations
                     b.ToTable("TVShows");
                 });
 
-            modelBuilder.Entity("Bka.TVMazeSraper.Models.Actor", b =>
+            modelBuilder.Entity("Bka.TVMazeSraper.Models.ActorTVShow", b =>
                 {
-                    b.HasOne("Bka.TVMazeSraper.Models.TVShow")
-                        .WithMany("Cast")
-                        .HasForeignKey("TVShowID");
+                    b.HasOne("Bka.TVMazeSraper.Models.Actor", "Actor")
+                        .WithMany("ActorsTVShows")
+                        .HasForeignKey("ActorID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Bka.TVMazeSraper.Models.TVShow", "TVShow")
+                        .WithMany("ActorsTVShows")
+                        .HasForeignKey("TVShowID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

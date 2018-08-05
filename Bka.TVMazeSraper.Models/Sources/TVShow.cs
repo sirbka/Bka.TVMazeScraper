@@ -19,9 +19,7 @@ namespace Bka.TVMazeSraper.Models
         /// Last time the show info was updated
         /// </summary>
         public int LastUpdateTime { get; set; }
-        /// <summary>
-        /// List of actors
-        /// </summary>
-        public List<Actor> Cast { get; set; }
+
+        public List<ActorTVShow> ActorsTVShows { get; set; }
     }
 }

@@ -9,6 +9,10 @@ namespace Bka.TVMazeSraper.Models.Interfaces
     {
         DbSet<TVShow> TVShows { get; set; }
         DbSet<Actor> Actors { get; set; }
+        /// <summary>
+        /// Relation many to many between Actors and TVShows
+        /// </summary>
+        DbSet<ActorTVShow> ActorsTVShows { get; set; }
 
         IDbContextTransaction BeginTransaction();
 

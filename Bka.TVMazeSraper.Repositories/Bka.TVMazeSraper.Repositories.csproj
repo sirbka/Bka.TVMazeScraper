@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20180801094756_InitialCreate.cs" />
+    <Compile Remove="old_Migrations\**" />
+    <EmbeddedResource Remove="old_Migrations\**" />
+    <None Remove="old_Migrations\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,10 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Bka.TVMazeSraper.Models\Bka.TVMazeSraper.Models.csproj" />
     <ProjectReference Include="..\Bka.TVMazeSraper.ShowScraper\Bka.TVMazeSraper.ShowScraper.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>
