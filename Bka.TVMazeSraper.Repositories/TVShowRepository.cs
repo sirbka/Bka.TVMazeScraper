@@ -74,13 +74,7 @@ namespace Bka.TVMazeSraper.Repositories
 
                             await StoreCast(show.ActorsTVShows, newTVShow);
                         }
-                        //else if (storedShow.LastUpdateTime < show.LastUpdateTime)
-                        //{
-                        //    _logger.LogInformation($"Update TV Show {show.ID} {show.Name} to DB.");
-                        //    storedShow.LastUpdateTime = show.LastUpdateTime;
 
-                        //    await StoreCast(show.ActorsTVShows);
-                        //}
                         await _showContext.SaveChangesAsync().ConfigureAwait(false);
                         transaction.Commit();                        
                     }
@@ -126,6 +120,7 @@ namespace Bka.TVMazeSraper.Repositories
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, $"Something bad happend inside transaction during Actor {actorShow.ActorID} update.");
+                        throw;
                     }
                 }  
                 else

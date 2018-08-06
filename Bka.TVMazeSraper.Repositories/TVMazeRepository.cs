@@ -26,7 +26,7 @@ namespace Bka.TVMazeSraper.Repositories
             var result = new List<TVShow>();
             for (uint i = startID; i < startID + count; i++)
             {
-                var tvShow = await _tvMazeApiScraper.GeTVShow(i);
+                var tvShow = await _tvMazeApiScraper.GeTVShow(i, cancellationToken);
                 if (tvShow != null)
                     result.Add(tvShow);
             }

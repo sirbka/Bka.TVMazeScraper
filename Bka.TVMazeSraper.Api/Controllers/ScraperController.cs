@@ -23,6 +23,13 @@ namespace Bka.TVMazeSraper.Api.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Scrape TVMaze Shows specified number of TVMaze shows
+        /// </summary>
+        /// <param name="start">Start TVMaze ID</param>
+        /// <param name="count">The number of TVMaze IDs for processing</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns></returns>
         [HttpGet]
         [Route("api/scrape")]
         public async Task<string> ScrapeAndStore(int start = 1, int count = 20, CancellationToken cancellationToken = default(CancellationToken))
@@ -31,7 +38,6 @@ namespace Bka.TVMazeSraper.Api.Controllers
             {
                 start = 1;
             }
-
             if (count < 1)
             {
                 count = 1;

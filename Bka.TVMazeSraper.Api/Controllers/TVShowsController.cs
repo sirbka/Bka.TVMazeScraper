@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
+using AutoMapper;
+
 using Bka.TVMazeSraper.Services.Interfaces;
 using Bka.TVMazeSraper.Models;
-using System.Threading;
 using Bka.TVMazeSraper.Api.Map;
-using AutoMapper;
 
 namespace Bka.TVMazeSraper.Api.Controllers
 {
@@ -29,6 +29,14 @@ namespace Bka.TVMazeSraper.Api.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Paginated list of all tv shows containing the id of the TV show and a list of 
+        /// all the cast that are playing in that TV show ordered by birthday descending.
+        /// </summary>
+        /// <param name="page">The page, starts at 0</param>
+        /// <param name="pagesize">The number of TV shows per page, default is 20</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns></returns>
         [HttpGet]
         [Route("api/shows")]
         public async Task<List<OutputTVShow>> Shows(int page = 0, int pagesize = 20, CancellationToken cancellationToken = default(CancellationToken))

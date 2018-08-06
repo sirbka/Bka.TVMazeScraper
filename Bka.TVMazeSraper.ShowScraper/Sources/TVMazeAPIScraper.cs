@@ -10,6 +10,8 @@ using Bka.TVMazeSraper.Models;
 using Bka.TVMazeSraper.Models.Interfaces;
 using Bka.TVMazeSraper.ShowScraper.Interfaces;
 using Bka.TVMazeSraper.ShowScraper.Models;
+using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Bka.TVMazeSraper.ShowScraper
 {
@@ -20,11 +22,16 @@ namespace Bka.TVMazeSraper.ShowScraper
     {
         private readonly IHttpClientFactory _httpTVMazeClientFactory;
         private readonly ITVMazeScraperConfiguration _configuration;
+        private readonly ILogger<TVMazeAPIScraper> _logger;
 
-        public TVMazeAPIScraper(IHttpClientFactory httpClientFactory, ITVMazeScraperConfiguration configuration)
+        public TVMazeAPIScraper(
+            IHttpClientFactory httpClientFactory, 
+            ITVMazeScraperConfiguration configuration,
+            ILogger<TVMazeAPIScraper> logger)
         {
             _httpTVMazeClientFactory = httpClientFactory;
             _configuration = configuration;
+            _logger = logger;
         }
 
         /// <summary>
@@ -33,14 +40,14 @@ namespace Bka.TVMazeSraper.ShowScraper
         /// <typeparam name="T">Type of Class for the incoming Json to be DeSerialized to.</typeparam>
         /// <param name="link">Relative tvmaze link to data collection</param>
         /// <returns></returns>
-        private async Task<T> Scrape<T>(string relativeLink)
+        private async Task<T> Scrape<T>(string relativeLink, CancellationToken cancellationToken = default(CancellationToken))
         {
             string results = "";
             string responseData = "";
 
             using (HttpClient client = _httpTVMazeClientFactory.CreateClient(_configuration.TvMazeHttpClientName))
             {
-                HttpResponseMessage response = await client.GetAsync(relativeLink);
+                HttpResponseMessage response = await client.GetAsync(relativeLink, cancellationToken);
                 responseData = await response.Content.ReadAsStringAsync();
 
                 if (response.ReasonPhrase == "OK")
@@ -66,8 +73,9 @@ namespace Bka.TVMazeSraper.ShowScraper
                     {
                         return JsonConvert.DeserializeObject<T>(results);
                     }
-                    catch (JsonSerializationException)
+                    catch (JsonSerializationException ex)
                     {
+                        _logger.LogError(ex, $"Error on deserialization of {results} ");
                         return default(T);
                     }
                 }
@@ -82,9 +90,9 @@ namespace Bka.TVMazeSraper.ShowScraper
         /// </summary>
         /// <param name="TVMazeID">TVMaze Show ID</param>
         /// <returns></returns>
-        public async Task<TVShow> GeTVShow(uint TVMazeID)
+        public async Task<TVShow> GeTVShow(uint TVMazeID, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var scrapedShows = await Scrape<MazeShowEmbedded>(string.Format(_configuration.TvMazeShowEmbedCastLinkPostfix, TVMazeID));
+            var scrapedShows = await Scrape<MazeShowEmbedded>(string.Format(_configuration.TvMazeShowEmbedCastLinkPostfix, TVMazeID), cancellationToken);
 
             if (scrapedShows != null)
             {
