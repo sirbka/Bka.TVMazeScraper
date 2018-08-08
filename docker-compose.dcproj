@@ -6,7 +6,7 @@
     <ProjectGuid>7f7046ed-3229-4b7b-9d2a-ee34ef13acc1</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://{ServiceIPAddress}{ServicePort}/api/values</DockerServiceUrl>
-    <DockerServiceName>bka.tvmazesraper.api</DockerServiceName>
+    <DockerServiceName>bka.tvmazescraper.api</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">
