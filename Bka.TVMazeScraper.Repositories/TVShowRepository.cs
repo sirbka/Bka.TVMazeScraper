@@ -64,23 +64,13 @@ namespace Bka.TVMazeScraper.Repositories
 
                     using (var transaction = _showContext.BeginTransaction())
                     {
-                        _logger.LogInformation( $"Add new TV Show {show.ID} {show.Name} to DB.");
-                        var newTVShow = new TVShow()
-                        {
-                            ID = show.ID,
-                            Name = show.Name,
-                            LastUpdateTime = show.LastUpdateTime
-                        };
-
-                        await  _showContext.TVShows.AddAsync(newTVShow);
-                        await _showContext.SaveChangesAsync().ConfigureAwait(false);
-
-                        await StoreCast(show.ActorsTVShows, newTVShow);
+                        await AddTVShow(show);
+                        await StoreCast(show.ActorsTVShows, show);
 
                         transaction.Commit();                        
                     }
                 }
-                catch (DbUpdateException ex)
+                catch (InvalidOperationException ex)
                 {
                     processedTVShows--;
                     _logger.LogError(ex, $"Update exception happened whilst TV Show {show.ID} update.");
@@ -94,6 +84,72 @@ namespace Bka.TVMazeScraper.Repositories
             return processedTVShows;
         }
 
+        private async Task<TVShow> AddTVShow(TVShow show)
+        {
+            try
+            {
+                _logger.LogInformation($"Add new TV Show {show.ID} {show.Name} to DB.");
+                var newTVShow = new TVShow()
+                {
+                    ID = show.ID,
+                    Name = show.Name,
+                    LastUpdateTime = show.LastUpdateTime
+                };
+
+                await _showContext.TVShows.AddAsync(newTVShow);
+                await _showContext.SaveChangesAsync().ConfigureAwait(false);
+
+                return newTVShow;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Something bad happend whilst TVShow {show.ID} update.");
+                throw;
+            }
+        }
+
+        private async Task<Actor> AddActor(Actor actor)
+        {
+            try
+            {
+                _logger.LogInformation($"Add Actor {actor.ID} {actor?.Name} to DB.");
+
+                await _showContext.Actors.AddAsync(actor);
+                await _showContext.SaveChangesAsync().ConfigureAwait(false);
+                return actor;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Something bad happend whilst Actor {actor.ID} update.");
+                throw;
+            }
+        }
+
+        private async Task<ActorTVShow> AddActorTVShowRelation(Actor actor, TVShow tvShow)
+        {
+            try
+            {
+                _logger.LogInformation($"Add Actor ({actor.ID}) TVShow ({tvShow.ID}) relation to DB.");
+                var newRelation = new ActorTVShow()
+                {
+                    Actor = actor,
+                    ActorID = actor.ID,
+                    TVShow = tvShow,
+                    TVShowID = tvShow.ID
+                };
+
+                await _showContext.ActorsTVShows.AddAsync(newRelation);
+                await _showContext.SaveChangesAsync().ConfigureAwait(false);
+
+                return newRelation;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Something bad happend whilst Actor ({actor.ID}) TVShow ({tvShow.ID}) relation update.");
+                throw;
+            }
+        }
+
         private async Task StoreCast(List<ActorTVShow> actorsAndShows, TVShow storedShow)
         {
             foreach (var actorShow in actorsAndShows)
@@ -101,48 +157,14 @@ namespace Bka.TVMazeScraper.Repositories
                 var storedActor = await _showContext.Actors.FirstOrDefaultAsync(act => act.ID == actorShow.ActorID);
                 if (storedActor == null)
                 {
-                    try
-                    {
-                        _logger.LogInformation($"Add Actor {actorShow.ActorID} {actorShow?.Actor?.Name} to DB.");
-                        var newActor = new Actor()
-                        {
-                            ID = actorShow.ActorID,
-                            Name = actorShow.Actor.Name,
-                            Birthday = actorShow.Actor?.Birthday
-                        };
-                        await _showContext.Actors.AddAsync(newActor);
-                        await _showContext.SaveChangesAsync().ConfigureAwait(false);
-                        _showContext.ActorsTVShows.Add(
-                            new ActorTVShow()
-                            {
-                                Actor = newActor,
-                                ActorID = newActor.ID,
-                                TVShow = storedShow,
-                                TVShowID = storedShow.ID
-                            });
-                        await _showContext.SaveChangesAsync().ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, $"Something bad happend inside transaction during Actor {actorShow.ActorID} update.");
-                        throw;
-                    }
+                    var newdActor = await AddActor(actorShow.Actor);
+                    await AddActorTVShowRelation(newdActor, storedShow);
                 }  
-                else
+                else if (!_showContext.ActorsTVShows.Any(actShow => actShow.TVShowID == storedShow.ID && actShow.ActorID == storedActor.ID))
                 {
-                    if (!_showContext.ActorsTVShows.Any(actShow => actShow.TVShowID == storedShow.ID && actShow.ActorID == storedActor.ID))
-                    {
-                        _showContext.ActorsTVShows.Add(
-                                new ActorTVShow()
-                                {
-                                    Actor = storedActor,
-                                    ActorID = storedActor.ID,
-                                    TVShow = storedShow,
-                                    TVShowID = storedShow.ID
-                                });
-                        await _showContext.SaveChangesAsync().ConfigureAwait(false);
-                    }
+                    await AddActorTVShowRelation(actorShow.Actor, storedShow);                       
                 }
+                
             }
         }
     }
