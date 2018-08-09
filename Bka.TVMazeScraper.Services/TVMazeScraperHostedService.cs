@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 using Bka.TVMazeScraper.Contracts;
 
@@ -13,21 +14,18 @@ namespace Bka.TVMazeScraper.Services
         private Timer _timer;
         private bool firstIteration = true;
         private TimeSpan _timerDueTime;
-        private readonly ITVShowService _tvShowService;
-        private readonly ITVMazeService _tvMazeService;
         private readonly ITVMazeScraperConfiguration _configuration;
-        private readonly ILogger<TVMazeScraperHostedService> _logger;        
+        private readonly ILogger<TVMazeScraperHostedService> _logger;
+        private readonly IServiceScopeFactory _serviceFactory;
 
-        public TVMazeScraperHostedService(
-            ITVShowService tvShowService,
-            ITVMazeService tvMazeService,
+        public TVMazeScraperHostedService(IServiceScopeFactory servicefactory,
             ITVMazeScraperConfiguration configuration,
             ILogger<TVMazeScraperHostedService> logger)
         {
-            _tvShowService = tvShowService;
-            _tvMazeService = tvMazeService;
             _configuration = configuration;
             _timerDueTime = TimeSpan.FromSeconds(_configuration.ScraperHostedServiceRepetitionSeconds);
+            _logger = logger;
+            _serviceFactory = servicefactory;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -57,19 +55,25 @@ namespace Bka.TVMazeScraper.Services
             try
             {
                 uint lastShowID = 1;
-                
-                // First iteration is always full check
-                if (!firstIteration)
-                {
-                    lastShowID = await _tvShowService.GetLastStoredTVShowID();
-                }
-                else
-                {
-                    firstIteration = false;
-                }
 
-                // TODO: enhance update proces: check only updates after all shows were added
-                await ScrapeFrom(lastShowID);                
+                using (var scope = _serviceFactory.CreateScope())
+                {
+                    var tvShowService = scope.ServiceProvider.GetRequiredService<ITVShowService>();
+                    var tvMazeService = scope.ServiceProvider.GetRequiredService<ITVMazeService>();
+                    
+                    // First iteration is always full check
+                    if (!firstIteration)
+                    {                        
+                        lastShowID = await tvShowService.GetLastStoredTVShowID();
+                    }
+                    else
+                    {
+                        firstIteration = false;
+                    }
+
+                    // TODO: enhance update proces: check only updates after all shows were added
+                    await ScrapeFrom(lastShowID, tvShowService, tvMazeService);
+                }
             }
             finally
             {
@@ -78,7 +82,7 @@ namespace Bka.TVMazeScraper.Services
             }
         }
 
-        private async Task<int> ScrapeFrom(uint tvMazeID)
+        private async Task<int> ScrapeFrom(uint tvMazeID, ITVShowService tvShowService, ITVMazeService tvMazeService)
         {
             int updatedTVShows = 0;
             uint pageSize = 20;
@@ -86,9 +90,9 @@ namespace Bka.TVMazeScraper.Services
 
             do
             {
-                var scrappedShows = await _tvMazeService.Scrape(tvMazeID, pageSize);
+                var scrappedShows = await tvMazeService.Scrape(tvMazeID, pageSize);
                 if (scrappedShows != null && scrappedShows.Count > 0)
-                    storedShowsCount = await _tvShowService.StoreTVShows(scrappedShows);
+                    storedShowsCount = await tvShowService.StoreTVShows(scrappedShows);
                 
                 _logger.Log(LogLevel.Information, $"{scrappedShows?.Count} of {storedShowsCount} scrapped TV Maze Shows were stored of {pageSize}");
                 tvMazeID += pageSize;

@@ -61,8 +61,7 @@ namespace Bka.TVMazeScraper.Api
             
             services.AddDbContext<TVShowContext>(options => options.UseSqlServer(
                 Configuration.GetConnectionString("TVShowDatabase"),
-                config => config.MigrationsAssembly(nameof(Bka.TVMazeScraper.Repositories))), 
-                ServiceLifetime.Singleton);
+                config => config.MigrationsAssembly(nameof(Bka.TVMazeScraper.Repositories))));
 
             // TVMaze HttpClient configuration
             var tvMaze429retryPolicy = Policy.HandleResult<HttpResponseMessage>(
@@ -82,9 +81,7 @@ namespace Bka.TVMazeScraper.Api
             .AddPolicyHandler(tvMaze429retryPolicy);
 
             // add background service to scrape and update TVShow data
-            // uncomment next line to enable TVShows DB auto filling
-            //services.AddHostedService<TVMazeScraperHostedService>(); 
-
+            services.AddHostedService<TVMazeScraperHostedService>();
         }
 
         public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
