@@ -13,6 +13,6 @@ namespace Bka.TVMazeScraper.ShowScraper.Models
         /// Collection of Actors
         /// </summary>
         [JsonProperty(@"cast")]
-        public List<MazeCastMember> Cast { get; set; }
+        public IEnumerable<MazeCastMember> Cast { get; set; }
     }
 }

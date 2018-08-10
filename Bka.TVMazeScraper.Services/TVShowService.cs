@@ -20,11 +20,11 @@ namespace Bka.TVMazeScraper.Services
             _logger = logger;            
         }
 
-        public async Task<List<TVShow>> GetTVShowsWithCast(int page, int pagesize, CancellationToken cancellationToken)
+        public async Task<ICollection<TVShow>> GetTVShowsWithCast(int page, int pagesize, CancellationToken cancellationToken = default(CancellationToken))
         {
             try
             {
-                return await _tvShowRepository.GetShowsWithCast(page, pagesize, cancellationToken).ConfigureAwait(false);
+                return await _tvShowRepository.GetShowsWithCast(page, pagesize, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -44,11 +44,11 @@ namespace Bka.TVMazeScraper.Services
             }
         }
 
-        public async Task<int> StoreTVShows(List<TVShow> tvShows)
+        public async Task<int> StoreTVShows(ICollection<TVShow> tvShows)
         {
             try
             {
-                var processedShowsCount = await _tvShowRepository.StoreTVShows(tvShows).ConfigureAwait(false);
+                var processedShowsCount = await _tvShowRepository.StoreTVShows(tvShows);
                 
                 _logger.Log( ((tvShows?.Count != processedShowsCount) ? LogLevel.Warning : LogLevel.Information),
                     $" {processedShowsCount} of {tvShows?.Count} TV Shows were processed");

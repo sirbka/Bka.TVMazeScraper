@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
 
 using Bka.TVMazeScraper.Models;
 using Bka.TVMazeScraper.Contracts;
+
 
 namespace Bka.TVMazeScraper.Repositories
 {
@@ -21,9 +23,9 @@ namespace Bka.TVMazeScraper.Repositories
             _tvMazeApiScraper = tvMazeApiScraper;
         }
 
-        public async Task<List<TVShow>> GetTVMazeShowsWithCast(uint startID = 1, uint count = 20, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<ICollection<TVShow>> GetTVMazeShowsWithCast(uint startID = 1, uint count = 20, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var result = new List<TVShow>();
+            var result = new Collection<TVShow>();
             for (uint i = startID; i < startID + count; i++)
             {
                 var tvShow = await _tvMazeApiScraper.GetTVShow(i, cancellationToken);

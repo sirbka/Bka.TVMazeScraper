@@ -27,6 +27,9 @@ namespace Bka.TVMazeScraper.Api
 {
     public class Startup
     {
+        private const string ConnectionStringName = "TVShowDatabase";
+        private const string LoggingConfigurationName = "Logging";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -38,21 +41,20 @@ namespace Bka.TVMazeScraper.Api
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            var scraperSettings = new TVMazeScraperConfiguration();
-            Configuration.GetSection("TVMazeScraperSettings").Bind(scraperSettings);
-            Validator.ValidateObject(scraperSettings, new System.ComponentModel.DataAnnotations.ValidationContext(scraperSettings), true);
-            services.AddSingleton<ITVMazeScraperConfiguration, TVMazeScraperConfiguration>(config => scraperSettings);
+            var scraperConfigurations = new TVMazeScraperConfiguration();
+            Configuration.GetSection(nameof(TVMazeScraperConfiguration)).Bind(scraperConfigurations);
+            Validator.ValidateObject(scraperConfigurations, new System.ComponentModel.DataAnnotations.ValidationContext(scraperConfigurations), true);
+            services.AddSingleton<ITVMazeScraperConfiguration, TVMazeScraperConfiguration>(config => scraperConfigurations);
 
             services.AddLogging(builder =>
             {
-                builder.AddConfiguration(Configuration.GetSection("Logging"));
+                builder.AddConfiguration(Configuration.GetSection(LoggingConfigurationName));
                 builder.AddConsole();
                 builder.AddDebug();                
             });
 
             services.AddAutoMapper(typeof(AutoMapperProfileConfiguration));
 
-            services.AddScoped<ITVShowContext, TVShowContext>();
             services.AddScoped<ITVShowRepository, TVShowRepository>();
             services.AddScoped<ITVMazeRepository, TVMazeRepository>();
             services.AddScoped<ITVShowService, TVShowService>();
@@ -60,12 +62,12 @@ namespace Bka.TVMazeScraper.Api
             services.AddScoped<ITVMazeAPIScraper, TVMazeAPIScraper>();
             
             services.AddDbContext<TVShowContext>(options => options.UseSqlServer(
-                Configuration.GetConnectionString("TVShowDatabase"),
+                Configuration.GetConnectionString(ConnectionStringName),
                 config => config.MigrationsAssembly(nameof(Bka.TVMazeScraper.Repositories))));
 
             // TVMaze HttpClient configuration
             var tvMaze429retryPolicy = Policy.HandleResult<HttpResponseMessage>(
-                response => (int)response.StatusCode == 429)
+                response => (int)response.StatusCode == 429 /*Too many request*/)
                 .WaitAndRetryAsync(new[]
                 {
                     TimeSpan.FromSeconds(2),
@@ -73,9 +75,9 @@ namespace Bka.TVMazeScraper.Api
                     TimeSpan.FromSeconds(10),
                 });
 
-            services.AddHttpClient(scraperSettings.TvMazeSrapperHttpClientName, client =>
+            services.AddHttpClient(scraperConfigurations.TvMazeSrapperHttpClientName, client =>
             {
-                client.BaseAddress = new Uri(scraperSettings.TVMazeBaseLink);
+                client.BaseAddress = new Uri(scraperConfigurations.TVMazeBaseLink);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             })
             .AddPolicyHandler(tvMaze429retryPolicy);
@@ -106,6 +108,7 @@ namespace Bka.TVMazeScraper.Api
                     {
                         Message = "An error occurred whilst processing your request"
                     }));
+
                     x.ForException<TVMazeScraperCustomException>().ReturnStatusCode(HttpStatusCode.InternalServerError)
                         .UsingMessageFormatter((ex, context) => JsonConvert.SerializeObject(new
                         {

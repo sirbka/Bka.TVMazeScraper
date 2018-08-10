@@ -1,12 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 
-using Bka.TVMazeScraper.Contracts;
 using Bka.TVMazeScraper.Models;
 
 namespace Bka.TVMazeScraper.Repositories
 {
-    public class TVShowContext : DbContext, ITVShowContext
+    public class TVShowContext : DbContext
     {
         public TVShowContext(DbContextOptions<TVShowContext> options)
            : base(options)
@@ -16,11 +14,6 @@ namespace Bka.TVMazeScraper.Repositories
         public DbSet<TVShow> TVShows { get; set; }
         public DbSet<Actor> Actors { get; set; }
         public DbSet<ActorTVShow> ActorsTVShows { get; set; }
-
-        public IDbContextTransaction BeginTransaction()
-        {
-            return Database.BeginTransaction();
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

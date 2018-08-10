@@ -21,7 +21,7 @@ namespace Bka.TVMazeScraper.Services
             _logger = logger;
         }
 
-        public async Task<List<TVShow>> Scrape(uint startID = 1, uint count = 20, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<ICollection<TVShow>> Scrape(uint startID = 1, uint count = 20, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await _tvMazeRepository.GetTVMazeShowsWithCast(startID, count, cancellationToken);
         }

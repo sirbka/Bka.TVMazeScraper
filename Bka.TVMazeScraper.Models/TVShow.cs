@@ -20,6 +20,6 @@ namespace Bka.TVMazeScraper.Models
         /// </summary>
         public int LastUpdateTime { get; set; }
 
-        public List<ActorTVShow> ActorsTVShows { get; set; }
+        public ICollection<ActorTVShow> ActorsTVShows { get; set; }
     }
 }

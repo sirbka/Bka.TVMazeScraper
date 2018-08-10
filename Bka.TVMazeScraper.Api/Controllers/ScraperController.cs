@@ -44,9 +44,9 @@ namespace Bka.TVMazeScraper.Api.Controllers
             }
 
             int storedShowsCount = 0;
-            var scrappedShows = await _tvMazeService.Scrape((uint)start, (uint)count, cancellationToken).ConfigureAwait(false);
+            var scrappedShows = await _tvMazeService.Scrape((uint)start, (uint)count, cancellationToken);
             if (scrappedShows != null && scrappedShows.Count > 0)
-                storedShowsCount = await _tvShowService.StoreTVShows(scrappedShows).ConfigureAwait(false);
+                storedShowsCount = await _tvShowService.StoreTVShows(scrappedShows);
 
             var result = $"{scrappedShows?.Count} of {storedShowsCount} scrapped TV Maze Shows were stored of {count}";
             _logger.Log(LogLevel.Information, result);

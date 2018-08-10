@@ -18,6 +18,6 @@ namespace Bka.TVMazeScraper.Api.Models
         /// <summary>
         /// List of actors
         /// </summary>
-        public List<OutputActor> Cast { get; set; }
+        public IEnumerable<OutputActor> Cast { get; set; }
     }
 }

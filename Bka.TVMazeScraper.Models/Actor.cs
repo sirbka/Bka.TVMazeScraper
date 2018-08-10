@@ -22,7 +22,7 @@ namespace Bka.TVMazeScraper.Models
         /// </summary>
         public DateTime? Birthday { get; set; }
 
-        public List<ActorTVShow> ActorsTVShows { get; set; }
+        public ICollection<ActorTVShow> ActorsTVShows { get; set; }
 
         public override string ToString()
         {

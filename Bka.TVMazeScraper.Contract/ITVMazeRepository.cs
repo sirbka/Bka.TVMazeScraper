@@ -15,6 +15,6 @@ namespace Bka.TVMazeScraper.Contracts
         /// <param name="startID">Start TV Maze ID</param>
         /// <param name="count">Number of subsequent TV Maze shows </param>
         /// <param name="cancellationToken"></param>
-        Task<List<TVShow>> GetTVMazeShowsWithCast(uint startID = 1, uint count = 20, CancellationToken cancellationToken = default(CancellationToken));
+        Task<ICollection<TVShow>> GetTVMazeShowsWithCast(uint startID = 1, uint count = 20, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

@@ -15,7 +15,7 @@ namespace Bka.TVMazeScraper.Contracts
         /// <param name="pagesize"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<List<TVShow>> GetTVShowsWithCast(int page, int pagesize, CancellationToken cancellationToken);
+        Task<ICollection<TVShow>> GetTVShowsWithCast(int page, int pagesize, CancellationToken cancellationToken);
 
         /// <summary>
         /// Last TVShow ID in Database
@@ -27,6 +27,6 @@ namespace Bka.TVMazeScraper.Contracts
         /// </summary>
         /// <param name="tvShows"></param>
         /// <returns></returns>
-        Task<int> StoreTVShows(List<TVShow> tvShows);
+        Task<int> StoreTVShows(ICollection<TVShow> tvShows);
     }
 }

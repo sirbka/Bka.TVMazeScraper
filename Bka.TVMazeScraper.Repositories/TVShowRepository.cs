@@ -14,11 +14,11 @@ namespace Bka.TVMazeScraper.Repositories
     public class TVShowRepository : ITVShowRepository
     {
         private readonly ILogger<TVShowRepository> _logger;
-        private readonly ITVShowContext _showContext;
+        private readonly TVShowContext _showContext;
 
         public TVShowRepository(
             ILogger<TVShowRepository> logger,
-            ITVShowContext showContext)
+            TVShowContext showContext)
         {
             _logger = logger;
             _showContext = showContext;
@@ -35,7 +35,7 @@ namespace Bka.TVMazeScraper.Repositories
             return lastShow?.ID ?? 0;
         }
 
-        public async Task<List<TVShow>> GetShowsWithCast(int page, int pagesize, CancellationToken cancellationToken)
+        public async Task<ICollection<TVShow>> GetShowsWithCast(int page, int pagesize, CancellationToken cancellationToken)
         {
             return await _showContext.TVShows
                 .Include(show => show.ActorsTVShows)
@@ -43,11 +43,10 @@ namespace Bka.TVMazeScraper.Repositories
                 .OrderBy(show => show.ID)
                 .Skip(page * pagesize)
                 .Take(pagesize)
-                .ToListAsync(cancellationToken)
-                .ConfigureAwait(false);
+                .ToListAsync(cancellationToken);
         }
 
-        public async Task<int> StoreTVShows(List<TVShow> tvShows)
+        public async Task<int> StoreTVShows(ICollection<TVShow> tvShows)
         {
             int processedTVShows = 0; 
             foreach(var show in tvShows)
@@ -57,12 +56,12 @@ namespace Bka.TVMazeScraper.Repositories
 
                 try
                 {
-                    var storedShow = await _showContext.TVShows.FirstOrDefaultAsync(sh => sh.ID == show.ID).ConfigureAwait(false);
+                    var storedShow = await _showContext.TVShows.FirstOrDefaultAsync(sh => sh.ID == show.ID);
                     if (storedShow != null)
                         //TODO: Update TVShow if it is required
                         continue;
 
-                    using (var transaction = _showContext.BeginTransaction())
+                    using (var transaction = _showContext.Database.BeginTransaction())
                     {
                         await AddTVShow(show);
                         await StoreCast(show.ActorsTVShows, show);
@@ -97,7 +96,7 @@ namespace Bka.TVMazeScraper.Repositories
                 };
 
                 await _showContext.TVShows.AddAsync(newTVShow);
-                await _showContext.SaveChangesAsync().ConfigureAwait(false);
+                await _showContext.SaveChangesAsync();
 
                 return newTVShow;
             }
@@ -115,7 +114,7 @@ namespace Bka.TVMazeScraper.Repositories
                 _logger.LogInformation($"Add Actor {actor.ID} {actor?.Name} to DB.");
 
                 await _showContext.Actors.AddAsync(actor);
-                await _showContext.SaveChangesAsync().ConfigureAwait(false);
+                await _showContext.SaveChangesAsync();
                 return actor;
             }
             catch (Exception ex)
@@ -139,7 +138,7 @@ namespace Bka.TVMazeScraper.Repositories
                 };
 
                 await _showContext.ActorsTVShows.AddAsync(newRelation);
-                await _showContext.SaveChangesAsync().ConfigureAwait(false);
+                await _showContext.SaveChangesAsync();
 
                 return newRelation;
             }
@@ -150,7 +149,7 @@ namespace Bka.TVMazeScraper.Repositories
             }
         }
 
-        private async Task StoreCast(List<ActorTVShow> actorsAndShows, TVShow storedShow)
+        private async Task StoreCast(ICollection<ActorTVShow> actorsAndShows, TVShow storedShow)
         {
             foreach (var actorShow in actorsAndShows)
             {

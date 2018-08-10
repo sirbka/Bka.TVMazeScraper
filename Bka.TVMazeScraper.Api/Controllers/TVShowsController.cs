@@ -39,7 +39,7 @@ namespace Bka.TVMazeScraper.Api.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("api/shows")]
-        public async Task<List<OutputTVShow>> Shows(int page = 0, int pagesize = 20, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<ICollection<OutputTVShow>> Shows(int page = 0, int pagesize = 20, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (page < 0)
             {
@@ -51,11 +51,11 @@ namespace Bka.TVMazeScraper.Api.Controllers
                 throw new TVMazeScraperBadRequestException("Pagesize number must be between 2 and 200");
             }
 
-            var tvShows = await _tvShowService.GetTVShowsWithCast(page, pagesize, cancellationToken).ConfigureAwait(false);
+            var tvShows = await _tvShowService.GetTVShowsWithCast(page, pagesize, cancellationToken);
 
             _logger.LogInformation($"Found {tvShows.Count} TV Shows for {page} ({pagesize})");
 
-            var result = _mapper.Map<List<TVShow>, List<OutputTVShow>>(tvShows).ToList();
+            var result = _mapper.Map<ICollection<TVShow>, List<OutputTVShow>>(tvShows);
 
             result.ForEach(s => s.Cast = s.Cast.OrderByDescending(cast => cast.Birthday).ToList());
 

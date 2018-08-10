@@ -15,7 +15,7 @@ namespace Bka.TVMazeScraper.Contracts
         /// <param name="pagesize"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<List<TVShow>> GetShowsWithCast(int page, int pagesize, CancellationToken cancellationToken);
+        Task<ICollection<TVShow>> GetShowsWithCast(int page, int pagesize, CancellationToken cancellationToken);
 
         /// <summary>
         /// Count of TV Shows in DB
@@ -34,6 +34,6 @@ namespace Bka.TVMazeScraper.Contracts
         /// </summary>
         /// <param name="tvShows"></param>
         /// <returns></returns>
-        Task<int> StoreTVShows(List<TVShow> tvShows);
+        Task<int> StoreTVShows(ICollection<TVShow> tvShows);
     }
 }

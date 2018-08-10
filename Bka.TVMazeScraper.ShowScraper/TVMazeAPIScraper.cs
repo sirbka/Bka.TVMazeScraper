@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Bka.TVMazeScraper.Models;
 using Bka.TVMazeScraper.ShowScraper.Models;
 using Bka.TVMazeScraper.Contracts;
+using System.Collections.ObjectModel;
 
 namespace Bka.TVMazeScraper.ShowScraper
 {
@@ -39,7 +40,6 @@ namespace Bka.TVMazeScraper.ShowScraper
         /// <returns></returns>
         private async Task<T> Scrape<T>(string relativeLink, CancellationToken cancellationToken = default(CancellationToken))
         {
-            string results = "";
             string responseData = "";
 
             using (HttpClient client = _httpTVMazeClientFactory.CreateClient(_configuration.TvMazeSrapperHttpClientName))
@@ -49,26 +49,19 @@ namespace Bka.TVMazeScraper.ShowScraper
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // TODO: enhance with RegEx
-                    results = responseData.Replace("<b>", "").Replace("</b>", "").Replace("<br>", "").Replace("<br />", "")
-                        .Replace("<br/>", "").Replace("<div>", "").Replace("<em>", "").Replace("<em/>", "").Replace("<i>", "")
-                        .Replace("</i>", "").Replace("<li>", "").Replace("</li>", "").Replace("<p>", "").Replace("</p>", "")
-                        .Replace("<ul>", "").Replace("</ul>", "");
-
                     try
                     {
-                        return JsonConvert.DeserializeObject<T>(results);
+                        return JsonConvert.DeserializeObject<T>(responseData);
                     }
                     catch (JsonSerializationException ex)
                     {
-                        _logger.LogError(ex, $"Error on deserialization of {results} ");
+                        _logger.LogError(ex, $"Error on deserialization of {responseData} ");
                         return default(T);
                     }
                 }
 
                 return default(T);
             }
-
         }
 
         /// <summary>
@@ -93,7 +86,7 @@ namespace Bka.TVMazeScraper.ShowScraper
             if (scrapedShows.Embedded?.Cast == null)
                 return tvShow;
 
-            var actrShow = tvShow.ActorsTVShows = new List<ActorTVShow>();
+            var actrShow = tvShow.ActorsTVShows = new Collection<ActorTVShow>();
             foreach (var actor in scrapedShows.Embedded?.Cast)
             {
                 var newActor = new Actor()
